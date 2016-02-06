@@ -1,0 +1,259 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: Mood Cloud
+# during dev, should point to your local machine
+host: localhost:3000
+# basePath prefixes all resource paths 
+basePath: /
+# 
+schemes:
+  # tip: remove http to make production-grade
+  - http
+  - https
+# format of bodies a client can send (Content-Type)
+consumes:
+  - application/json
+# format of the responses to the client (Accepts)
+produces:
+  - application/json
+paths:
+  /devices:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: devices
+    get:
+      description: Returns the list of all devices to the caller
+      # used as the method name of the controller
+      operationId: getAllDevices
+      parameters:
+        - name: filter
+          in: query
+          description: Specifies a filter to be used when listing devices
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/HelloWorldResponse"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    post:
+      description: Returns the list of all devices to the caller
+      # used as the method name of the controller
+      operationId: postDevice
+      parameters:
+        - name: type
+          in: header
+          description: Specifies the type of device to be created
+          required: true
+          type: string
+        - name: owner
+          in: header
+          description: Specifies the owner of device to be created
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Device"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /devices/{id}:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: devices
+    get:
+      description: Returns the list of all devices to the caller
+      # used as the method name of the controller
+      operationId: getDevice
+      parameters:
+        - name: id
+          in: path
+          description: Specifies a device id of the device to be returned
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Device"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    patch:
+      description: Updates a device's details with the parameters
+      # used as the method name of the controller
+      operationId: patchDevice
+      parameters:
+        - name: id
+          in: path
+          description: Specifies a device id of the device to be returned
+          required: true
+          type: string
+        - name: type
+          in: header
+          description: Specifies a device type of the device to be updated
+          required: false
+          type: string
+        - name: name
+          in: header
+          description: Specifies a device name of the device to be updated
+          required: false
+          type: string  
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Device"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      description: Updates a device's details with the parameters
+      # used as the method name of the controller
+      operationId: deleteDevice
+      parameters:
+        - name: id
+          in: path
+          description: Specifies a device id of the device to be returned
+          required: true
+          type: string
+        
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Device"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"            
+  /observations:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: observations
+    get:
+      description: Returns the list of all observations to the caller
+      # used as the method name of the controller
+      operationId: getAllObservations
+      parameters:
+        - name: filter
+          in: query
+          description: Specifies a filter to be used when listing observations
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Success
+          headers:
+              x-next:
+                type: string
+                description: A link to the next page of observations
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Observations"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"    
+            
+  /observations/{id}:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: observations
+    
+    get:
+      description: Returns the list of all observations to the caller
+      # used as the method name of the controller
+      operationId: getObservations
+      parameters:
+        - name: id
+          in: path
+          description: Specifies a device id of the device to be returned
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Observations"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"   
+            
+  /swagger:
+    x-swagger-pipe: swagger_raw
+# complex objects have schema definitions
+#AOBTODO chanage thsi Hello world response to be a list of devices
+definitions:
+  HelloWorldResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+  Device:
+    required:
+      - id
+      - deviceType
+    properties:
+      id:
+        type: string
+      deviceType:
+        type: string
+      name:
+        type: string
+      isEnabled:
+        type: boolean
+      registeredOn:
+        type: string
+      updatedOn:
+        type: string
+        
+  
+  Observations:
+    type: object
+    properties:
+      deviceID: 
+        type: string
+      points:
+        type: array
+        items:
+          $ref: "#/definitions/ObservationPoint"            
+  ObservationPoint:
+    properties:
+      name:   
+        type: string
+      observationType: 
+        type: string
+      value:
+        type: object      
+      
+  ErrorResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+      id:
+        type: string

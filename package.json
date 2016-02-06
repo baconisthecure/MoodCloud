@@ -1,0 +1,29 @@
+{
+  "name": "hello-swagger",
+  "version": "0.0.1",
+  "private": true,
+  "description": "New Swagger API Project",
+  "keywords": [],
+  "author": "",
+  "license": "",
+  "main": "app.js",
+  "dependencies": {
+    "kerberos": "0.0.17",
+    "moment": "^2.11.1",
+    "mongodb": "^2.1.4",
+    "mongoose": "^4.3.6",
+    "mqtt": "^1.6.3",
+    "nconf": "^0.8.2",
+    "restify": "^4.0.2",
+    "swagger-restify-mw": "^0.1.0",
+    "winston": "^2.1.1"
+  },
+  "devDependencies": {
+    "should": "^7.1.0",
+    "supertest": "^1.0.0"
+  },
+  "scripts": {
+    "start": "node app.js",
+    "test": "swagger project test"
+  }
+}
