@@ -90,7 +90,7 @@ client.on('publish', function (packet) {
  
 client.on('message', function (topic, message) {
   // message is Buffer 
-    logger.debug("New message with topic \"%s\" and message: %s",topic.toString(),message.toString());  
+    //logger.debug("New message with topic \"%s\" and message: %s",topic.toString(),message.toString());  
     
     switch(topic  )
     {
@@ -134,7 +134,7 @@ client.on('message', function (topic, message) {
             case "moodObservation":
             {
                 //{"name":"blue","deviceId":"id","value":233}
-                logger.debug("moodObservation message");
+                //logger.debug("moodObservation message");
                 //logger.debug("the message of the observations is %s",message);
                 var messageObject = JSON.parse(message);
                 //logger.debug("value %s, name %s, ID %s",messageObject.value,messageObject.name,messageObject.deviceID);
@@ -157,30 +157,30 @@ client.on('message', function (topic, message) {
                 newObservation.name = messageObject.name;
                 newObservation.value = messageObject.value;                
                 
-                
+                //save the observation to the DB
                 newObservation.saveAsync()
                 .spread(function(saveObservation,numAffected)
                 {
-                    logger.debug("saved %d objects",numAffected);
-                    logger.debug("saved an %s objects with name %s and value %s",saveObservation.type,saveObservation.name,saveObservation.value);
+                    
+                   // logger.debug("saved a %s object with name %s and value %s",saveObservation.name,saveObservation.name,saveObservation.value);
                     
                     
                        //find all the observations for today
 
-                      var ColorChangeObject =  {};
-
-
+                    var ColorChangeObject =  {};
                     var queryPromises = [todaysObservations('red'),todaysObservations('green'),todaysObservations('blue')];
 
+                    //Wait for all the queries to come back before moving on
                     Promise.all(queryPromises)
                     .then(function(queryArr){
-                        logger.warn(queryArr);
+                        //logger.warn(queryArr);
                         ColorChangeObject.redIntensity = queryArr[0];
                         ColorChangeObject.greenIntensity = queryArr[1];
                         ColorChangeObject.blueIntensity = queryArr[2];
 
                     })
                     .then(function(){
+                        //Now that we know all the colors lets publish that ot so we can cahange the colors of everyting
                         logger.debug(JSON.stringify(ColorChangeObject));
                         client.publish('colorChange', JSON.stringify(ColorChangeObject));
                     })
@@ -216,7 +216,7 @@ var todaysObservations = function (colorName)
     
 
     //blue //AOBTODO change this from a function to a query to get past callback issue (mongoosejs.com/docs/promises.html)
-     var bluePromise = Observation.find({
+     var colorPromise = Observation.find({
         observed_at:{
             $gte: today.toDate(),
             $lt: tomorrow.toDate()
@@ -224,23 +224,24 @@ var todaysObservations = function (colorName)
         'name':colorName
     })
      .execAsync()
-     .then(function(blueObservations)
+     .then(function(colorObservations)
     {    
-         logger.debug("%d observations",blueObservations.length);
+         logger.debug("%d %s observations",colorObservations.length,colorName);
 
-        if(blueObservations.length > 0)
+        if(colorObservations.length > 0)
         {
-            var blueColor = 0;
+            var color = 0;
 
-            for(var i=0;i<blueObservations.length;i++)
+            for(var i=0;i<colorObservations.length;i++)
             {
-                logger.debug("Observation: %d, Decay Value: %d",blueObservations[i].value,blueObservations[i].decayValue());
-                blueColor = blueColor + blueObservations[i].decayValue();                                
+                //logger.debug("Observation: %d, Decay Value: %d",colorObservations[i].value,colorObservations[i].decayValue());
+                color = color + colorObservations[i].decayValue();                                
             }  
 
-            blueColor = Math.round(blueColor / blueObservations.length);                            
+            color = Math.round(color / colorObservations.length);  
+            //logger.debug("Number observations: %d , decay Average:%d ",colorObservations.length,color);
             //logger.debug("Decayed Average weight %d",blueColor);
-            return Promise.resolve(blueColor);                        
+            return Promise.resolve(color);                        
         }
          else
         {
@@ -256,7 +257,7 @@ var todaysObservations = function (colorName)
          return Promise.reject(new Error(err));
      });      
     
-    return bluePromise;
+    return colorPromise;
     
     
 }

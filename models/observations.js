@@ -9,7 +9,7 @@ Promise.promisifyAll(mongoose);
 var moment = require("moment");//used for date/time functions
 
 var e = 2.718281828;
-var r = -.5;
+var r = -.6;
 
 logger.debug(config.get("mongoose:uri"));
 mongoose.connect(config.get('mongoose:uri'));
